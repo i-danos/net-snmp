@@ -25,7 +25,7 @@ MIBS_DIR="/usr/share/snmp/mibs:/usr/share/snmp/mibs/iana:/usr/share/snmp/mibs/ie
 ifeq (linux,$(DEB_BUILD_ARCH_OS))
 MIB_MODULES += ucd-snmp/diskio ucd-snmp/lmsensorsMib etherlike-mib/dot3StatsTable
 IPV6 = --enable-ipv6
-DEB_DH_GENCONTROL_ARGS=-- -Vos-specific-dev="libsensors4-dev"
+DEB_DH_GENCONTROL_ARGS=-- -Vos-specific-dev="libsensors-dev"
 else
 ifeq (kfreebsd,$(DEB_BUILD_ARCH_OS))
 IPV6 = --enable-ipv6
@@ -42,7 +42,7 @@ MIB_MODULES += host
 endif
 
 %:
-	dh $@ --with autoreconf,python2,systemd
+	dh $@ --with autoreconf,systemd
 
 override_dh_auto_configure:
 	dh_auto_configure -- --prefix=/usr --sysconfdir=/etc --mandir=/usr/share/man \
@@ -66,16 +66,6 @@ override_dh_auto_configure:
 	  --with-defaults
 # --with-python-modules=""  # don't specify it, since dh_python2 cannot handle it.
 # --with-dnssec-local-validation  # not enabled since libval doesn't exist in Debian yet
-
-override_dh_auto_build:
-	dh_auto_build
-	cd python; python2 setup.py build --basedir=$(CURDIR)
-
-override_dh_auto_install:
-	dh_auto_install
-	cd python; python2 setup.py install --root=$(CURDIR)/debian/tmp \
-		--install-layout=deb --basedir=$(CURDIR) ; \
-		find $(CURDIR) -name *.pyc -delete
 
 override_dh_clean:
 	dh_clean
@@ -105,7 +95,6 @@ override_dh_installdocs:
 	dh_installdocs --link-doc=libsnmp$(LIB_VERSION) \
 		       -plibsnmp-dev \
 		       -plibsnmp$(LIB_VERSION)-dbg \
-		       -ppython-netsnmp \
 		       -psnmpd \
 		       -psnmptrapd \
 		       -psnmp
